@@ -4,9 +4,13 @@ import { TEAMS } from "@/data/teams";
 import { useAlbum, teamProgress } from "@/hooks/useAlbum";
 import { TeamCard } from "@/components/TeamCard";
 import { ProgressBar } from "@/components/ProgressBar";
+import { useAlbumsCtx } from "@/contexts/AlbumsContext";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
-  const { state, hydrated, stats } = useAlbum();
+  const { current } = useAlbumsCtx();
+  const { state, loading, stats } = useAlbum(current?.id ?? null);
+  const hydrated = !loading;
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -31,6 +35,23 @@ export default function HomePage() {
     }
     return Array.from(m.entries());
   }, [filtered]);
+
+  if (!current) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
+        <p className="text-base font-semibold">Você ainda não tem um álbum</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Crie um álbum próprio ou entre em um álbum compartilhado para começar.
+        </p>
+        <Link
+          to="/albums"
+          className="mt-5 inline-flex rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-glow"
+        >
+          Ir para Álbuns
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

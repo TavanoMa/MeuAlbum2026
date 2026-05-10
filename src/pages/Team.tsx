@@ -5,11 +5,13 @@ import { getTeam, stickerIds } from "@/data/teams";
 import { useAlbum, teamProgress } from "@/hooks/useAlbum";
 import { StickerCard } from "@/components/StickerCard";
 import { ProgressBar } from "@/components/ProgressBar";
+import { useAlbumsCtx } from "@/contexts/AlbumsContext";
 
 export default function TeamPage() {
   const { code = "" } = useParams();
   const team = getTeam(code);
-  const { state, getCount, toggleOwn, addRepeat, removeRepeat } = useAlbum();
+  const { current } = useAlbumsCtx();
+  const { state, getCount, toggleOwn, addRepeat, removeRepeat } = useAlbum(current?.id ?? null);
 
   useEffect(() => {
     document.title = team

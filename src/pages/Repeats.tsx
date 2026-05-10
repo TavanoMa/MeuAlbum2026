@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Search, Repeat2 } from "lucide-react";
 import { TEAMS, stickerIds } from "@/data/teams";
 import { useAlbum } from "@/hooks/useAlbum";
+import { useAlbumsCtx } from "@/contexts/AlbumsContext";
 
 export default function RepeatsPage() {
-  const { state, addRepeat, removeRepeat } = useAlbum();
+  const { current } = useAlbumsCtx();
+  const { state, addRepeat, removeRepeat } = useAlbum(current?.id ?? null);
   const [q, setQ] = useState("");
   const [filterCode, setFilterCode] = useState<string>("ALL");
 

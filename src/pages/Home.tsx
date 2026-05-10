@@ -36,6 +36,23 @@ export default function HomePage() {
     return Array.from(m.entries());
   }, [filtered]);
 
+  if (!current) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
+        <p className="text-base font-semibold">Você ainda não tem um álbum</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Crie um álbum próprio ou entre em um álbum compartilhado para começar.
+        </p>
+        <Link
+          to="/albums"
+          className="mt-5 inline-flex rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-glow"
+        >
+          Ir para Álbuns
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur-xl sm:p-8">

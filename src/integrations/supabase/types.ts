@@ -14,13 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      album_members: {
+        Row: {
+          album_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          album_id: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          album_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_members_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      album_stickers: {
+        Row: {
+          album_id: string
+          count: number
+          sticker_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          album_id: string
+          count?: number
+          sticker_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          album_id?: string
+          count?: number
+          sticker_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_stickers_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      albums: {
+        Row: {
+          created_at: string
+          id: string
+          invite_code: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_code: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_code?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_album_member: {
+        Args: { _album_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_album_owner: {
+        Args: { _album_id: string; _user_id: string }
+        Returns: boolean
+      }
+      join_album_by_code: { Args: { _code: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

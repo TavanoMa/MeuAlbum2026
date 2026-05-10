@@ -1,45 +1,33 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { getTeam, stickerIds } from "@/data/teams";
 import { useAlbum, teamProgress } from "@/hooks/useAlbum";
 import { StickerCard } from "@/components/StickerCard";
 import { ProgressBar } from "@/components/ProgressBar";
 
-export const Route = createFileRoute("/team/$code")({
-  head: ({ params }) => {
-    const team = getTeam(params.code);
-    const title = team ? `${team.name} (${team.code}) — Álbum 2026` : "Seleção";
-    return {
-      meta: [
-        { title },
-        {
-          name: "description",
-          content: team
-            ? `Controle as figurinhas de ${team.name} no álbum da Copa do Mundo 2026.`
-            : "Seleção do álbum 2026.",
-        },
-      ],
-    };
-  },
-  loader: ({ params }) => {
-    const team = getTeam(params.code);
-    if (!team) throw notFound();
-    return { team };
-  },
-  component: TeamPage,
-  notFoundComponent: () => (
-    <div className="py-20 text-center">
-      <p className="text-sm text-muted-foreground">Seleção não encontrada.</p>
-      <Link to="/" className="mt-4 inline-block text-primary underline">
-        Voltar
-      </Link>
-    </div>
-  ),
-});
-
-function TeamPage() {
-  const { team } = Route.useLoaderData();
+export default function TeamPage() {
+  const { code = "" } = useParams();
+  const team = getTeam(code);
   const { state, getCount, toggleOwn, addRepeat, removeRepeat } = useAlbum();
+
+  useEffect(() => {
+    document.title = team
+      ? `${team.name} (${team.code}) — Álbum 2026`
+      : "Seleção — Álbum 2026";
+  }, [team]);
+
+  if (!team) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-sm text-muted-foreground">Seleção não encontrada.</p>
+        <Link to="/" className="mt-4 inline-block text-primary underline">
+          Voltar
+        </Link>
+      </div>
+    );
+  }
+
   const ids = stickerIds(team);
   const p = teamProgress(state, team.code);
 
@@ -72,8 +60,8 @@ function TeamPage() {
 
         <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            <span className="font-bold text-foreground tabular-nums">{p.owned}</span>/
-            {p.total} figurinhas
+            <span className="font-bold text-foreground tabular-nums">{p.owned}</span>/{p.total}{" "}
+            figurinhas
             {p.repeats > 0 && (
               <span className="ml-2 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
                 {p.repeats} repetidas
@@ -88,9 +76,8 @@ function TeamPage() {
       </section>
 
       <div className="rounded-2xl border border-border/40 bg-card/40 p-3 text-[11px] text-muted-foreground">
-        <span className="font-semibold text-foreground">Dica:</span> toque para marcar
-        “Tenho”. Use o <span className="font-bold text-primary">+</span> para adicionar
-        repetidas.
+        <span className="font-semibold text-foreground">Dica:</span> toque para marcar “Tenho”.
+        Use o <span className="font-bold text-primary">+</span> para adicionar repetidas.
       </div>
 
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-5">

@@ -1,34 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { TEAMS } from "@/data/teams";
 import { useAlbum, teamProgress } from "@/hooks/useAlbum";
 import { TeamCard } from "@/components/TeamCard";
 import { ProgressBar } from "@/components/ProgressBar";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Álbum Copa do Mundo 2026 — Controle de Figurinhas" },
-      {
-        name: "description",
-        content:
-          "Controle suas figurinhas do álbum da Copa do Mundo 2026: tenho, faltando e repetidas.",
-      },
-    ],
-  }),
-  component: HomePage,
-});
-
-function HomePage() {
+export default function HomePage() {
   const { state, hydrated, stats } = useAlbum();
   const [q, setQ] = useState("");
 
+  useEffect(() => {
+    document.title = "Álbum Copa do Mundo 2026 — Controle de Figurinhas";
+  }, []);
+
   const filtered = useMemo(
     () =>
-      TEAMS.filter((t) =>
-        t.name.toLowerCase().includes(q.toLowerCase()) ||
-        t.code.toLowerCase().includes(q.toLowerCase()),
+      TEAMS.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q.toLowerCase()) ||
+          t.code.toLowerCase().includes(q.toLowerCase()),
       ),
     [q],
   );
@@ -98,12 +88,7 @@ function HomePage() {
             {teams.map((team) => {
               const p = teamProgress(state, team.code);
               return (
-                <TeamCard
-                  key={team.code}
-                  team={team}
-                  owned={p.owned}
-                  repeats={p.repeats}
-                />
+                <TeamCard key={team.code} team={team} owned={p.owned} repeats={p.repeats} />
               );
             })}
           </div>
@@ -133,9 +118,7 @@ function Stat({
       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </p>
-      <p className={`mt-1 text-2xl font-black tabular-nums sm:text-3xl ${color}`}>
-        {value}
-      </p>
+      <p className={`mt-1 text-2xl font-black tabular-nums sm:text-3xl ${color}`}>{value}</p>
     </div>
   );
 }

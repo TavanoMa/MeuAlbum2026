@@ -1,26 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, Repeat2 } from "lucide-react";
 import { TEAMS, stickerIds } from "@/data/teams";
 import { useAlbum } from "@/hooks/useAlbum";
 
-export const Route = createFileRoute("/repetidas")({
-  head: () => ({
-    meta: [
-      { title: "Minhas Repetidas — Álbum Copa do Mundo 2026" },
-      {
-        name: "description",
-        content: "Veja todas as suas figurinhas repetidas, separadas por seleção.",
-      },
-    ],
-  }),
-  component: RepeatsPage,
-});
-
-function RepeatsPage() {
+export default function RepeatsPage() {
   const { state, addRepeat, removeRepeat } = useAlbum();
   const [q, setQ] = useState("");
   const [filterCode, setFilterCode] = useState<string>("ALL");
+
+  useEffect(() => {
+    document.title = "Minhas Repetidas — Álbum Copa do Mundo 2026";
+  }, []);
 
   const data = useMemo(() => {
     const groups: Array<{ team: (typeof TEAMS)[number]; items: { id: string; n: number }[] }> = [];
@@ -38,10 +29,7 @@ function RepeatsPage() {
     return groups;
   }, [state, q, filterCode]);
 
-  const totalRepeats = data.reduce(
-    (s, g) => s + g.items.reduce((a, b) => a + b.n, 0),
-    0,
-  );
+  const totalRepeats = data.reduce((s, g) => s + g.items.reduce((a, b) => a + b.n, 0), 0);
 
   return (
     <div className="space-y-6">
@@ -53,9 +41,7 @@ function RepeatsPage() {
           <div>
             <h1 className="text-2xl font-black sm:text-3xl">Minhas Repetidas</h1>
             <p className="text-xs text-muted-foreground">
-              <span className="font-bold text-destructive tabular-nums">
-                {totalRepeats}
-              </span>{" "}
+              <span className="font-bold text-destructive tabular-nums">{totalRepeats}</span>{" "}
               figurinhas disponíveis para troca
             </p>
           </div>
@@ -93,8 +79,8 @@ function RepeatsPage() {
         <div className="rounded-3xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
           <p className="text-base font-semibold">Nenhuma repetida por aqui ✨</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Marque repetidas no botão{" "}
-            <span className="font-bold text-primary">+</span> em cada figurinha.
+            Marque repetidas no botão <span className="font-bold text-primary">+</span> em cada
+            figurinha.
           </p>
           <Link
             to="/"
@@ -105,17 +91,10 @@ function RepeatsPage() {
         </div>
       ) : (
         data.map(({ team, items }) => (
-          <section
-            key={team.code}
-            className="rounded-2xl border border-border/60 bg-card/60 p-4"
-          >
+          <section key={team.code} className="rounded-2xl border border-border/60 bg-card/60 p-4">
             <div className="mb-3 flex items-center gap-3">
               <span className="text-2xl">{team.flag}</span>
-              <Link
-                to="/team/$code"
-                params={{ code: team.code }}
-                className="flex-1 font-bold hover:text-primary"
-              >
+              <Link to={`/team/${team.code}`} className="flex-1 font-bold hover:text-primary">
                 {team.name}
               </Link>
               <span className="rounded-full bg-destructive/15 px-2.5 py-0.5 text-xs font-bold text-destructive">

@@ -1,74 +1,98 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { TEAMS, TOTAL_STICKERS, stickerIds } from "@/data/teams";
 
-const STORAGE_KEY = "wc2026-album-v1";
-
-// state[stickerId] = number of copies (0 = not owned, 1 = owned, 2+ = owned + repeats)
 export type AlbumState = Record<string, number>;
 
-function load(): AlbumState {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AlbumState) : {};
-  } catch {
-    return {};
-  }
-}
-
-export function useAlbum() {
+export function useAlbum(albumId: string | null) {
   const [state, setState] = useState<AlbumState>({});
-  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setState(load());
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* ignore */
+  const reload = useCallback(async () => {
+    if (!albumId) {
+      setState({});
+      setLoading(false);
+      return;
     }
-  }, [state, hydrated]);
+    setLoading(true);
+    const { data } = await supabase
+      .from("album_stickers")
+      .select("sticker_id, count")
+      .eq("album_id", albumId);
+    const map: AlbumState = {};
+    for (const row of data ?? []) {
+      if (row.count > 0) map[row.sticker_id] = row.count;
+    }
+    setState(map);
+    setLoading(false);
+  }, [albumId]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  const persist = useCallback(
+    async (id: string, count: number) => {
+      if (!albumId) return;
+      const { data: u } = await supabase.auth.getUser();
+      if (count <= 0) {
+        await supabase
+          .from("album_stickers")
+          .delete()
+          .eq("album_id", albumId)
+          .eq("sticker_id", id);
+      } else {
+        await supabase.from("album_stickers").upsert(
+          {
+            album_id: albumId,
+            sticker_id: id,
+            count,
+            updated_at: new Date().toISOString(),
+            updated_by: u.user?.id ?? null,
+          },
+          { onConflict: "album_id,sticker_id" },
+        );
+      }
+    },
+    [albumId],
+  );
+
+  const setCount = useCallback(
+    (id: string, n: number) => {
+      setState((s) => {
+        const next = { ...s };
+        if (n <= 0) delete next[id];
+        else next[id] = n;
+        return next;
+      });
+      persist(id, Math.max(0, n));
+    },
+    [persist],
+  );
 
   const getCount = useCallback((id: string) => state[id] ?? 0, [state]);
 
-  const toggleOwn = useCallback((id: string) => {
-    setState((s) => {
-      const cur = s[id] ?? 0;
-      const next = { ...s };
-      if (cur === 0) next[id] = 1;
-      else if (cur === 1) delete next[id];
-      else next[id] = cur; // se tem repetidas, não desliga; usar setCount
-      return next;
-    });
-  }, []);
+  const toggleOwn = useCallback(
+    (id: string) => {
+      const cur = state[id] ?? 0;
+      if (cur === 0) setCount(id, 1);
+      else if (cur === 1) setCount(id, 0);
+    },
+    [state, setCount],
+  );
 
-  const addRepeat = useCallback((id: string) => {
-    setState((s) => ({ ...s, [id]: (s[id] ?? 0) + 1 }));
-  }, []);
+  const addRepeat = useCallback(
+    (id: string) => setCount(id, (state[id] ?? 0) + 1),
+    [state, setCount],
+  );
+  const removeRepeat = useCallback(
+    (id: string) => {
+      const cur = state[id] ?? 0;
+      if (cur > 1) setCount(id, cur - 1);
+    },
+    [state, setCount],
+  );
 
-  const removeRepeat = useCallback((id: string) => {
-    setState((s) => {
-      const cur = s[id] ?? 0;
-      if (cur <= 1) return s;
-      return { ...s, [id]: cur - 1 };
-    });
-  }, []);
-
-  const setCount = useCallback((id: string, n: number) => {
-    setState((s) => {
-      const next = { ...s };
-      if (n <= 0) delete next[id];
-      else next[id] = n;
-      return next;
-    });
-  }, []);
-
-  // stats
   let owned = 0;
   let repeats = 0;
   for (const team of TEAMS) {
@@ -82,12 +106,13 @@ export function useAlbum() {
 
   return {
     state,
-    hydrated,
+    loading,
     getCount,
     toggleOwn,
     addRepeat,
     removeRepeat,
     setCount,
+    reload,
     stats: { owned, missing, repeats, total: TOTAL_STICKERS },
   };
 }

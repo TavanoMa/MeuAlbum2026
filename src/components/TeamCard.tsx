@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import type { Team } from "@/data/teams";
 import { ProgressBar } from "./ProgressBar";
@@ -13,8 +13,7 @@ export function TeamCard({ team, owned, repeats }: Props) {
   const complete = owned === team.total;
   return (
     <Link
-      to="/team/$code"
-      params={{ code: team.code }}
+      to={`/team/${team.code}`}
       className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-glow"
     >
       {complete && (

@@ -4,9 +4,13 @@ import { TEAMS } from "@/data/teams";
 import { useAlbum, teamProgress } from "@/hooks/useAlbum";
 import { TeamCard } from "@/components/TeamCard";
 import { ProgressBar } from "@/components/ProgressBar";
+import { useAlbumsCtx } from "@/contexts/AlbumsContext";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
-  const { state, hydrated, stats } = useAlbum();
+  const { current } = useAlbumsCtx();
+  const { state, loading, stats } = useAlbum(current?.id ?? null);
+  const hydrated = !loading;
   const [q, setQ] = useState("");
 
   useEffect(() => {

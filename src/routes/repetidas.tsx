@@ -1,0 +1,182 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Search, Repeat2 } from "lucide-react";
+import { TEAMS, stickerIds } from "@/data/teams";
+import { useAlbum } from "@/hooks/useAlbum";
+
+export const Route = createFileRoute("/repetidas")({
+  head: () => ({
+    meta: [
+      { title: "Minhas Repetidas — Álbum Copa do Mundo 2026" },
+      {
+        name: "description",
+        content: "Veja todas as suas figurinhas repetidas, separadas por seleção.",
+      },
+    ],
+  }),
+  component: RepeatsPage,
+});
+
+function RepeatsPage() {
+  const { state, addRepeat, removeRepeat } = useAlbum();
+  const [q, setQ] = useState("");
+  const [filterCode, setFilterCode] = useState<string>("ALL");
+
+  const data = useMemo(() => {
+    const groups: Array<{ team: (typeof TEAMS)[number]; items: { id: string; n: number }[] }> = [];
+    for (const team of TEAMS) {
+      if (filterCode !== "ALL" && filterCode !== team.code) continue;
+      const items: { id: string; n: number }[] = [];
+      for (const id of stickerIds(team)) {
+        const c = state[id] ?? 0;
+        if (c > 1 && id.toLowerCase().includes(q.toLowerCase())) {
+          items.push({ id, n: c - 1 });
+        }
+      }
+      if (items.length) groups.push({ team, items });
+    }
+    return groups;
+  }, [state, q, filterCode]);
+
+  const totalRepeats = data.reduce(
+    (s, g) => s + g.items.reduce((a, b) => a + b.n, 0),
+    0,
+  );
+
+  return (
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/20 text-destructive">
+            <Repeat2 className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black sm:text-3xl">Minhas Repetidas</h1>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-bold text-destructive tabular-nums">
+                {totalRepeats}
+              </span>{" "}
+              figurinhas disponíveis para troca
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar figurinha (ex: BRA10)…"
+            className="w-full rounded-full border border-border bg-card/60 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60 focus:shadow-glow"
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <FilterChip active={filterCode === "ALL"} onClick={() => setFilterCode("ALL")}>
+            Todas
+          </FilterChip>
+          {TEAMS.map((t) => (
+            <FilterChip
+              key={t.code}
+              active={filterCode === t.code}
+              onClick={() => setFilterCode(t.code)}
+            >
+              <span className="mr-1">{t.flag}</span>
+              {t.code}
+            </FilterChip>
+          ))}
+        </div>
+      </div>
+
+      {data.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
+          <p className="text-base font-semibold">Nenhuma repetida por aqui ✨</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Marque repetidas no botão{" "}
+            <span className="font-bold text-primary">+</span> em cada figurinha.
+          </p>
+          <Link
+            to="/"
+            className="mt-5 inline-flex rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-glow transition-all hover:scale-105"
+          >
+            Ir para o álbum
+          </Link>
+        </div>
+      ) : (
+        data.map(({ team, items }) => (
+          <section
+            key={team.code}
+            className="rounded-2xl border border-border/60 bg-card/60 p-4"
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-2xl">{team.flag}</span>
+              <Link
+                to="/team/$code"
+                params={{ code: team.code }}
+                className="flex-1 font-bold hover:text-primary"
+              >
+                {team.name}
+              </Link>
+              <span className="rounded-full bg-destructive/15 px-2.5 py-0.5 text-xs font-bold text-destructive">
+                {items.reduce((s, i) => s + i.n, 0)}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {items.map(({ id, n }) => (
+                <div
+                  key={id}
+                  className="flex items-center gap-2 rounded-full border border-border bg-background/40 py-1 pl-3 pr-1"
+                >
+                  <span className="text-xs font-bold tabular-nums">{id}</span>
+                  <span className="rounded-full bg-destructive/20 px-1.5 text-[10px] font-bold text-destructive">
+                    +{n}
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => removeRepeat(id)}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs hover:bg-destructive hover:text-destructive-foreground"
+                      aria-label="Remover repetida"
+                    >
+                      −
+                    </button>
+                    <button
+                      onClick={() => addRepeat(id)}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground hover:scale-110"
+                      aria-label="Adicionar repetida"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+    </div>
+  );
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+        active
+          ? "border-primary bg-primary text-primary-foreground shadow-glow"
+          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}

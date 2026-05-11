@@ -33,6 +33,9 @@ export default function RepeatsPage() {
 
   const totalRepeats = data.reduce((s, g) => s + g.items.reduce((a, b) => a + b.n, 0), 0);
 
+   const FLAG_URL =
+  "https://ssnasqktjrrpfjascmgd.supabase.co/storage/v1/object/public/flags/";
+
   return (
     <div className="space-y-6">
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur-xl">
@@ -95,7 +98,17 @@ export default function RepeatsPage() {
         data.map(({ team, items }) => (
           <section key={team.code} className="rounded-2xl border border-border/60 bg-card/60 p-4">
             <div className="mb-3 flex items-center gap-3">
-              <span className="text-2xl">{team.flag}</span>
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-4xl shadow-inner">
+            {team.flag.endsWith(".png") ? (
+  <img
+    src={`${FLAG_URL}${team.flag}`}
+    alt={team.name}
+    className="h-8 w-8 rounded-full object-cover"
+  />
+) : (
+  <span>{team.flag}</span>
+)}
+          </div>
               <Link to={`/team/${team.code}`} className="flex-1 font-bold hover:text-primary">
                 {team.name}
               </Link>

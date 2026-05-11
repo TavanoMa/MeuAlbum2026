@@ -11,6 +11,9 @@ type Props = {
 
 export function TeamCard({ team, owned, repeats }: Props) {
   const complete = owned === team.total;
+
+  const FLAG_URL =
+  "https://ssnasqktjrrpfjascmgd.supabase.co/storage/v1/object/public/flags/";
   return (
     <Link
       to={`/team/${team.code}`}
@@ -22,9 +25,17 @@ export function TeamCard({ team, owned, repeats }: Props) {
         </div>
       )}
       <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-2xl">
-          <span>{team.flag}</span>
-        </div>
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-4xl shadow-inner">
+            {team.flag.endsWith(".png") ? (
+  <img
+    src={`${FLAG_URL}${team.flag}`}
+    alt={team.name}
+    className="h-8 w-8 rounded-full object-cover"
+  />
+) : (
+  <span>{team.flag}</span>
+)}
+          </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold">{team.name}</p>
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground">

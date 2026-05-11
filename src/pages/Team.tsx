@@ -33,6 +33,9 @@ export default function TeamPage() {
   const ids = stickerIds(team);
   const p = teamProgress(state, team.code);
 
+  const FLAG_URL =
+  "https://ssnasqktjrrpfjascmgd.supabase.co/storage/v1/object/public/flags/";
+
   return (
     <div className="space-y-6">
       <Link
@@ -46,7 +49,17 @@ export default function TeamPage() {
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-4xl shadow-inner">
-            <span>{team.flag}</span>
+            {team.flag.endsWith(".png") ? (
+  <img
+    src={`${FLAG_URL}${team.flag}`}
+    alt={team.name}
+    className="h-8 w-8 rounded-full object-cover"
+  />
+) : (
+  <span className="">
+      {team.flag}
+    </span>
+)}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">

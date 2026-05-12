@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Repeat2 } from "lucide-react";
+import { Search, Repeat2, Share2, Check } from "lucide-react";
 import { TEAMS, stickerIds } from "@/data/teams";
 import { useAlbum } from "@/hooks/useAlbum";
 import { useAlbumsCtx } from "@/contexts/AlbumsContext";
@@ -10,6 +10,7 @@ export default function RepeatsPage() {
   const { state, addRepeat, removeRepeat } = useAlbum(current?.id ?? null);
   const [q, setQ] = useState("");
   const [filterCode, setFilterCode] = useState<string>("ALL");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     document.title = "Minhas Repetidas — Álbum Copa do Mundo 2026";
@@ -36,10 +37,47 @@ export default function RepeatsPage() {
    const FLAG_URL =
   "https://ssnasqktjrrpfjascmgd.supabase.co/storage/v1/object/public/flags/";
 
+  async function handleShare() {
+  const lines: string[] = [];
+
+  lines.push("🏆 Minhas figurinhas repetidas — Copa 2026");
+  lines.push("");
+
+  for (const group of data) {
+    
+
+    lines.push(` ${group.team.name}`);
+
+    for (const item of group.items) {
+      lines.push(`• ${item.id} (+${item.n})`);
+    }
+
+    lines.push("");
+  }
+
+  lines.push(`Total de repetidas: ${totalRepeats}`);
+  lines.push("");
+  lines.push("Quer trocar? 👀");
+
+  const text = lines.join("\n");
+
+  try {
+    await navigator.clipboard.writeText(text);
+
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2500);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
   return (
     <div className="space-y-6">
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/20 text-destructive">
             <Repeat2 className="h-5 w-5" />
           </div>
@@ -50,6 +88,22 @@ export default function RepeatsPage() {
               figurinhas disponíveis para troca
             </p>
           </div>
+          <button
+  onClick={handleShare}
+  className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-4 py-2 text-xs font-semibold transition-all hover:scale-105 hover:border-primary"
+>
+  {copied ? (
+    <>
+      <Check className="h-4 w-4" />
+      Copiado!
+    </>
+  ) : (
+    <>
+      <Share2 className="h-4 w-4" />
+      Compartilhar
+    </>
+  )}
+</button>
         </div>
       </section>
 
@@ -73,7 +127,15 @@ export default function RepeatsPage() {
               active={filterCode === t.code}
               onClick={() => setFilterCode(t.code)}
             >
-              <span className="mr-1">{t.flag}</span>
+              {t.flag.endsWith(".png") ? (
+  <img
+    src={`${FLAG_URL}${t.flag}`}
+    alt={t.name}
+    className="h-6 w-6 rounded-full object-cover mb-1"
+  />
+) : (
+  <span>{t.flag}</span>
+)}
               {t.code}
             </FilterChip>
           ))}

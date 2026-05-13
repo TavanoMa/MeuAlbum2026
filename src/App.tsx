@@ -7,6 +7,7 @@ import RepeatsPage from "@/pages/Repeats";
 import TeamPage from "@/pages/Team";
 import LoginPage from "@/pages/Login";
 import AlbumsPage from "@/pages/Albums";
+import TradesPage from "./pages/TradesPage";
 
 function NotFound() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/repetidas" element={<RepeatsPage />} />
                     <Route path="/albums" element={<AlbumsPage />} />
+                    <Route path="/trades" element={<TradesPage />} />
                     <Route path="/team/:code" element={<TeamPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

@@ -57,7 +57,7 @@ export default function RepeatsPage() {
 
   lines.push(`Total de repetidas: ${totalRepeats}`);
   lines.push("");
- 
+  
 
   const text = lines.join("\n");
 

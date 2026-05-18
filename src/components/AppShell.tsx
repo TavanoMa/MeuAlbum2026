@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Repeat2, Trophy, Library, LogOut, ChevronDown } from "lucide-react";
+import { Home, Repeat2, Trophy, Library, LogOut, ChevronDown, ArrowDownUp } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlbumsCtx } from "@/contexts/AlbumsContext";
@@ -15,6 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/", label: "Álbum", icon: Home },
     { to: "/repetidas", label: "Repetidas", icon: Repeat2 },
     { to: "/albums", label: "Álbuns", icon: Library },
+    { to: "/trades", label: "Trocar", icon: ArrowDownUp }
   ];
 
   const isActive = (to: string) =>
@@ -35,7 +36,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <p className="text-sm font-bold">Álbum 2026</p>
             </div>
           </Link>
-
           {user && albums.length > 0 && (
             <div className="relative min-w-0 flex-1 sm:max-w-xs">
               <button

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Repeat2, Trophy, Library, LogOut, ChevronDown, ArrowDownUp } from "lucide-react";
+import { Home, Repeat2, Trophy, Library, LogOut, ChevronDown, ArrowDownUp, ListTodo } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlbumsCtx } from "@/contexts/AlbumsContext";
@@ -14,6 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const tabs = [
     { to: "/", label: "Álbum", icon: Home },
     { to: "/repetidas", label: "Repetidas", icon: Repeat2 },
+    { to: "/faltando", label: "Faltando", icon: ListTodo },
     { to: "/albums", label: "Álbuns", icon: Library },
     { to: "/trades", label: "Trocar", icon: ArrowDownUp }
   ];

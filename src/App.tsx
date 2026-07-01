@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AlbumsProvider } from "@/contexts/AlbumsContext";
 import HomePage from "@/pages/Home";
 import RepeatsPage from "@/pages/Repeats";
+import MissingPage from "@/pages/Missing";
 import TeamPage from "@/pages/Team";
 import LoginPage from "@/pages/Login";
 import AlbumsPage from "@/pages/Albums";
@@ -52,6 +53,7 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/repetidas" element={<RepeatsPage />} />
+                    <Route path="/faltando" element={<MissingPage />} />
                     <Route path="/albums" element={<AlbumsPage />} />
                     <Route path="/trades" element={<TradesPage />} />
                     <Route path="/team/:code" element={<TeamPage />} />
